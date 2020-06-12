@@ -192,6 +192,11 @@ protected:
         framebuffer_layout = layout;
     }
 
+    /**
+     * Clip the provided coordinates to be inside the touchscreen area.
+     */
+    std::tuple<unsigned, unsigned> ClipToTouchScreen(unsigned new_x, unsigned new_y) const;
+
 private:
     /**
      * Handler called when the minimal client area was requested to be changed via SetConfig.
@@ -210,11 +215,6 @@ private:
 
     class TouchState;
     std::shared_ptr<TouchState> touch_state;
-
-    /**
-     * Clip the provided coordinates to be inside the touchscreen area.
-     */
-    std::tuple<unsigned, unsigned> ClipToTouchScreen(unsigned new_x, unsigned new_y) const;
 
     void UpdateMinimumWindowSize(std::pair<unsigned, unsigned> min_size);
 };

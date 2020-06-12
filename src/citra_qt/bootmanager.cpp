@@ -288,6 +288,16 @@ void GRenderWindow::keyReleaseEvent(QKeyEvent* event) {
     InputCommon::GetKeyboard()->ReleaseKey(event->key());
 }
 
+void GRenderWindow::leaveEvent(QEvent* event) {
+        auto pos = QWidget::mapFromGlobal(QCursor::pos());
+        const auto [tx, ty] = this->ClipToTouchScreen(pos.x(), pos.y());
+        if (pos.x() != tx || pos.y() != ty) {
+            QCursor::setPos(QWidget::mapToGlobal(QPoint(tx, ty)));
+            this->TouchMoved(tx, ty);
+        }
+        QWidget::leaveEvent(event);
+}
+
 void GRenderWindow::mousePressEvent(QMouseEvent* event) {
     if (event->source() == Qt::MouseEventSynthesizedBySystem)
         return; // touch input is handled in TouchBeginEvent
@@ -308,7 +318,16 @@ void GRenderWindow::mouseMoveEvent(QMouseEvent* event) {
 
     auto pos = event->pos();
     const auto [x, y] = ScaleTouch(pos);
-    this->TouchMoved(x, y);
+
+    if (true) {
+        const auto [tx, ty] = this->ClipToTouchScreen(x, y);
+        if (x != tx || y != ty) {
+            QCursor::setPos(QWidget::mapToGlobal(QPoint(tx, ty)));
+            this->TouchMoved(tx, ty);
+        } else {
+            this->TouchMoved(x, y);
+        }
+    }
     InputCommon::GetMotionEmu()->Tilt(pos.x(), pos.y());
     QWidget::mouseMoveEvent(event);
 }
