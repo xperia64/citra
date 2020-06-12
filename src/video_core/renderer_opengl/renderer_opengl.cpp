@@ -182,7 +182,7 @@ public:
         // If theres no free frames, we will wait until one shows up
         if (free_queue.empty()) {
             free_cv.wait(lock, [&] { return (!free_queue.empty() || quit.load()); });
-            if (quit) {
+            if (quit.load()) {
                 throw OGLTextureMailboxException("VideoDumpingMailbox quitting");
             }
 
