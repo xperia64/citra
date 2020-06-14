@@ -4,7 +4,6 @@
 
 #include <algorithm>
 #include <array>
-#include <atomic>
 #include <condition_variable>
 #include <cstddef>
 #include <cstdlib>
@@ -174,15 +173,15 @@ public:
 /// This mailbox is different in that it will never discard rendered frames
 class OGLVideoDumpingMailbox : public OGLTextureMailbox {
 public:
-    std::atomic<bool> quit = false;
+    bool quit = false;
 
     Frontend::Frame* GetRenderFrame() override {
         std::unique_lock<std::mutex> lock(swap_chain_lock);
 
         // If theres no free frames, we will wait until one shows up
         if (free_queue.empty()) {
-            free_cv.wait(lock, [&] { return (!free_queue.empty() || quit.load()); });
-            if (quit.load()) {
+            free_cv.wait(lock, [&] { return (!free_queue.empty() || quit); });
+            if (quit) {
                 throw OGLTextureMailboxException("VideoDumpingMailbox quitting");
             }
 
@@ -1105,14 +1104,21 @@ void RendererOpenGL::TryPresent(int timeout_ms) {
 void RendererOpenGL::UpdateFramerate() {}
 
 void RendererOpenGL::PrepareVideoDumping() {
-    static_cast<OGLVideoDumpingMailbox*>(frame_dumper.mailbox.get())->quit.store(false);
+    auto* mailbox = static_cast<OGLVideoDumpingMailbox*>(frame_dumper.mailbox.get());
+    {
+        std::unique_lock(mailbox->swap_chain_lock);
+        mailbox->quit = false;
+    }
     frame_dumper.StartDumping();
 }
 
 void RendererOpenGL::CleanupVideoDumping() {
     frame_dumper.StopDumping();
     auto* mailbox = static_cast<OGLVideoDumpingMailbox*>(frame_dumper.mailbox.get());
-    mailbox->quit.store(true);
+    {
+        std::unique_lock(mailbox->swap_chain_lock);
+        mailbox->quit = true;
+    }
     mailbox->free_cv.notify_one();
 }
 
