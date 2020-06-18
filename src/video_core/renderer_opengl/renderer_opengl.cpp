@@ -1106,7 +1106,7 @@ void RendererOpenGL::UpdateFramerate() {}
 void RendererOpenGL::PrepareVideoDumping() {
     auto* mailbox = static_cast<OGLVideoDumpingMailbox*>(frame_dumper.mailbox.get());
     {
-        std::unique_lock(mailbox->swap_chain_lock);
+        std::unique_lock lock(mailbox->swap_chain_lock);
         mailbox->quit = false;
     }
     frame_dumper.StartDumping();
@@ -1116,7 +1116,7 @@ void RendererOpenGL::CleanupVideoDumping() {
     frame_dumper.StopDumping();
     auto* mailbox = static_cast<OGLVideoDumpingMailbox*>(frame_dumper.mailbox.get());
     {
-        std::unique_lock(mailbox->swap_chain_lock);
+        std::unique_lock lock(mailbox->swap_chain_lock);
         mailbox->quit = true;
     }
     mailbox->free_cv.notify_one();
