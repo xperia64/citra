@@ -691,6 +691,15 @@ public:
         void CheckNew3DS(Kernel::HLERequestContext& ctx);
 
         /**
+         * APT::CheckNew3DSThingy service function
+         *  Outputs:
+         *      1: Result code, 0 on success otherwise error code
+         *      2: u8 output: 2 = New3DS+valid/initialized (in Smash4), 1 = Old3DS or you did
+         * something wrong with NS???
+         */
+        void CheckNew3DSThingy(Kernel::HLERequestContext& ctx);
+
+        /**
          * APT::IsTitleAllowed service function
          *  Inputs:
          *      0 : Header Code[0x01050100]
