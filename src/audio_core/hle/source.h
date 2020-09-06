@@ -171,6 +171,7 @@ private:
             ar& format;
             ar& current_sample_number;
             ar& next_sample_number;
+            ar& current_buffer_physical_address;
             ar& current_buffer;
             ar& buffer_update;
             ar& current_buffer_id;

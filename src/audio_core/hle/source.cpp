@@ -169,7 +169,7 @@ void Source::ParseConfig(SourceConfiguration::Configuration& config,
         // This will be the starting sample for the first time the buffer is played.
     }
 
-    // TODO(xperia64): is this in the correct spot in terms of the bit handling order?
+    // TODO(xperia64): Is this in the correct spot in terms of the bit handling order?
     if (config.partial_embedded_buffer_dirty) {
         config.partial_embedded_buffer_dirty.Assign(0);
 
@@ -182,6 +182,9 @@ void Source::ParseConfig(SourceConfiguration::Configuration& config,
         // whatever is in config, because that may be invalid.
         const u8* const memory =
             memory_system->GetPhysicalPointer(state.current_buffer_physical_address & 0xFFFFFFFC);
+
+        // TODO(xperia64): This could potentially be optimized by only decoding the new data and
+        // appending that to the buffer.
         if (memory) {
             const unsigned num_channels = state.mono_or_stereo == MonoOrStereo::Stereo ? 2 : 1;
             bool valid = false;
@@ -219,7 +222,7 @@ void Source::ParseConfig(SourceConfiguration::Configuration& config,
                     std::next(state.current_buffer.begin(), state.current_sample_number));
         }
         LOG_TRACE(Audio_DSP, "partially updating embedded buffer addr={:#010x} len={} id={}",
-                  state.physical_address, config.length, config.buffer_id);
+                  state.current_buffer_physical_address, config.length, config.buffer_id);
     }
 
     if (config.embedded_buffer_dirty) {
