@@ -594,7 +594,7 @@ public:
         while (state.event_queue.Pop(event)) {
             switch (event.type) {
             case SDL_JOYAXISMOTION:
-                if (axis_memory.find(event.jaxis.axis) == axis_memory.end()) {
+                if (!axis_memory.count(event.jaxis.axis)) {
                     axis_memory[event.jaxis.axis] = event.jaxis.value;
                     break;
                 } else {
@@ -616,7 +616,7 @@ public:
     }
 
 private:
-    std::map<int, int> axis_memory;
+    std::unordered_map<int, int> axis_memory;
 };
 
 class SDLAnalogPoller final : public SDLPoller {
