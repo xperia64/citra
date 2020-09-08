@@ -216,10 +216,11 @@ void Source::ParseConfig(SourceConfiguration::Configuration& config,
             // just re-consume the samples up to the current sample number. There may be some
             // imprecision here with the current sample number, as Detective Pikachu sounds a little
             // rough at times.
-            if (valid)
+            if (valid) {
                 state.current_buffer.erase(
                     state.current_buffer.begin(),
                     std::next(state.current_buffer.begin(), state.current_sample_number));
+            }
         }
         LOG_TRACE(Audio_DSP, "partially updating embedded buffer addr={:#010x} len={} id={}",
                   state.current_buffer_physical_address, config.length, config.buffer_id);
