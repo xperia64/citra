@@ -217,9 +217,17 @@ void Source::ParseConfig(SourceConfiguration::Configuration& config,
             // imprecision here with the current sample number, as Detective Pikachu sounds a little
             // rough at times.
             if (valid) {
-                state.current_buffer.erase(
-                    state.current_buffer.begin(),
-                    std::next(state.current_buffer.begin(), state.current_sample_number));
+
+                // TODO(xperia64): Tomodachi life apparently can decrease config.length when the
+                // user skips dialog. I don't know the correct behavior, but to avoid crashing, just
+                // reset the current sample number to 0 and don't try to truncate the buffer
+                if (state.current_buffer.size() < state.current_sample_number) {
+                    state.current_sample_number = 0;
+                } else {
+                    state.current_buffer.erase(
+                        state.current_buffer.begin(),
+                        std::next(state.current_buffer.begin(), state.current_sample_number));
+                }
             }
         }
         LOG_TRACE(Audio_DSP, "partially updating embedded buffer addr={:#010x} len={} id={}",
