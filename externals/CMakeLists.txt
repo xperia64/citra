@@ -133,6 +133,9 @@ endif()
 # lodepng
 add_subdirectory(lodepng)
 
-# libyuv
-add_subdirectory(libyuv)
-target_include_directories(yuv INTERFACE ./libyuv/include)
+# (xperia64): Only use libyuv on Android b/c of build issues on Windows and mandatory JPEG
+if(ANDROID)
+    # libyuv
+    add_subdirectory(libyuv)
+    target_include_directories(yuv INTERFACE ./libyuv/include)
+endif()
