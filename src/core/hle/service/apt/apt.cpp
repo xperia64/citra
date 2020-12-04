@@ -1013,7 +1013,7 @@ void Module::APTInterface::CheckNew3DSThingy(Kernel::HLERequestContext& ctx) {
     IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
 
     rb.Push(RESULT_SUCCESS);
-    rb.Push(static_cast<u8>(Settings::values.is_new_3ds) + 1);
+    rb.Push<u8>(Settings::values.is_new_3ds ? 2 : 1);
 
     LOG_WARNING(Service_APT, "(STUBBED) called");
 }
