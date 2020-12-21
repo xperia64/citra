@@ -43,6 +43,10 @@ option(USE_SYSTEM_BOOST "Use the system Boost libs (instead of the bundled ones)
 
 CMAKE_DEPENDENT_OPTION(ENABLE_FDK "Use FDK AAC decoder" OFF "NOT ENABLE_FFMPEG_AUDIO_DECODER;NOT ENABLE_MF" OFF)
 
+option(ENABLE_TESTS "Enable building the 'tests' binary as part of 'all'" ON)
+
+option(ENABLE_ROOM "Enable building the 'citra-room' binary as part of 'all'" ON)
+
 if(NOT EXISTS ${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit)
     message(STATUS "Copying pre-commit hook")
     file(COPY hooks/pre-commit
@@ -353,6 +357,13 @@ endif()
 add_subdirectory(src)
 add_subdirectory(dist/installer)
 
+if (NOT ENABLE_TESTS)
+    set_target_properties(tests PROPERTIES EXCLUDE_FROM_ALL True)
+endif()
+
+if (NOT ENABLE_ROOM)
+    set_target_properties(citra-room PROPERTIES EXCLUDE_FROM_ALL True)
+endif()
 
 # Set citra-qt project or citra project as default StartUp Project in Visual Studio depending on whether QT is enabled or not
 if(ENABLE_QT)
