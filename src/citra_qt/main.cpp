@@ -203,13 +203,9 @@ GMainWindow::GMainWindow()
     // Show one-time "callout" messages to the user
     ShowTelemetryCallout();
 
-    // make sure menubar has the arrow cursor instead of inheriting from this
-    ui->menubar->setCursor(QCursor());
-    statusBar()->setCursor(QCursor());
-
     mouse_hide_timer.setInterval(default_mouse_timeout);
     connect(&mouse_hide_timer, &QTimer::timeout, this, &GMainWindow::HideMouseCursor);
-    connect(ui->menubar, &QMenuBar::hovered, this, &GMainWindow::ShowMouseCursor);
+    connect(ui->menubar, &QMenuBar::hovered, this, &GMainWindow::OnMouseActivity);
 
     if (UISettings::values.check_for_update_on_start) {
         CheckForUpdates();
@@ -623,7 +619,7 @@ void GMainWindow::RestoreUIState() {
     OnDisplayTitleBars(ui->action_Display_Dock_Widget_Headers->isChecked());
 
     ui->action_Show_Filter_Bar->setChecked(UISettings::values.show_filter_bar);
-    game_list->setFilterVisible(ui->action_Show_Filter_Bar->isChecked());
+    game_list->SetFilterVisible(ui->action_Show_Filter_Bar->isChecked());
 
     ui->action_Show_Status_Bar->setChecked(UISettings::values.show_status_bar);
     statusBar()->setVisible(ui->action_Show_Status_Bar->isChecked());
@@ -1026,6 +1022,8 @@ void GMainWindow::BootGame(const QString& filename) {
     emu_thread->start();
 
     connect(render_window, &GRenderWindow::Closed, this, &GMainWindow::OnStopGame);
+    connect(render_window, &GRenderWindow::MouseActivity, this, &GMainWindow::OnMouseActivity);
+
     // BlockingQueuedConnection is important here, it makes sure we've finished refreshing our views
     // before the CPU continues
     connect(emu_thread.get(), &EmuThread::DebugModeEntered, registersWidget,
@@ -1051,7 +1049,6 @@ void GMainWindow::BootGame(const QString& filename) {
     if (UISettings::values.hide_mouse) {
         mouse_hide_timer.start();
         setMouseTracking(true);
-        ui->centralwidget->setMouseTracking(true);
     }
 
     // show and hide the render_window to create the context
@@ -1146,14 +1143,13 @@ void GMainWindow::ShutdownGame() {
     render_window->hide();
     loading_screen->hide();
     loading_screen->Clear();
-    if (game_list->isEmpty())
+    if (game_list->IsEmpty())
         game_list_placeholder->show();
     else
         game_list->show();
-    game_list->setFilterFocus();
+    game_list->SetFilterFocus();
 
     setMouseTracking(false);
-    ui->centralwidget->setMouseTracking(false);
 
     // Disable status bar updates
     status_bar_update_timer.stop();
@@ -1453,7 +1449,7 @@ void GMainWindow::OnMenuInstallCIA() {
 
 void GMainWindow::InstallCIA(QStringList filepaths) {
     ui->action_Install_CIA->setEnabled(false);
-    game_list->setDirectoryWatcherEnabled(false);
+    game_list->SetDirectoryWatcherEnabled(false);
     progress_bar->show();
     progress_bar->setMaximum(INT_MAX);
 
@@ -1507,7 +1503,7 @@ void GMainWindow::OnCIAInstallReport(Service::AM::InstallStatus status, QString 
 void GMainWindow::OnCIAInstallFinished() {
     progress_bar->hide();
     progress_bar->setValue(0);
-    game_list->setDirectoryWatcherEnabled(true);
+    game_list->SetDirectoryWatcherEnabled(true);
     ui->action_Install_CIA->setEnabled(true);
     game_list->PopulateAsync(UISettings::values.game_dirs);
 }
@@ -1750,11 +1746,9 @@ void GMainWindow::OnConfigure() {
         config->Save();
         if (UISettings::values.hide_mouse && emulation_running) {
             setMouseTracking(true);
-            ui->centralwidget->setMouseTracking(true);
             mouse_hide_timer.start();
         } else {
             setMouseTracking(false);
-            ui->centralwidget->setMouseTracking(false);
         }
     } else {
         Settings::values.input_profiles = old_input_profiles;
@@ -1824,11 +1818,11 @@ void GMainWindow::OnOpenCitraFolder() {
 }
 
 void GMainWindow::OnToggleFilterBar() {
-    game_list->setFilterVisible(ui->action_Show_Filter_Bar->isChecked());
+    game_list->SetFilterVisible(ui->action_Show_Filter_Bar->isChecked());
     if (ui->action_Show_Filter_Bar->isChecked()) {
-        game_list->setFilterFocus();
+        game_list->SetFilterFocus();
     } else {
-        game_list->clearFilter();
+        game_list->ClearFilter();
     }
 }
 
@@ -2089,22 +2083,30 @@ void GMainWindow::HideMouseCursor() {
         ShowMouseCursor();
         return;
     }
-    setCursor(QCursor(Qt::BlankCursor));
+    render_window->setCursor(QCursor(Qt::BlankCursor));
 }
 
 void GMainWindow::ShowMouseCursor() {
-    unsetCursor();
+    render_window->unsetCursor();
     if (emu_thread != nullptr && UISettings::values.hide_mouse) {
         mouse_hide_timer.start();
     }
 }
 
-void GMainWindow::mouseMoveEvent(QMouseEvent* event) {
+void GMainWindow::OnMouseActivity() {
     ShowMouseCursor();
 }
 
+void GMainWindow::mouseMoveEvent(QMouseEvent* event) {
+    OnMouseActivity();
+}
+
 void GMainWindow::mousePressEvent(QMouseEvent* event) {
-    ShowMouseCursor();
+    OnMouseActivity();
+}
+
+void GMainWindow::mouseReleaseEvent(QMouseEvent* event) {
+    OnMouseActivity();
 }
 
 void GMainWindow::OnCoreError(Core::System::ResultStatus result, std::string details) {
