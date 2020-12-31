@@ -691,13 +691,12 @@ public:
         void CheckNew3DS(Kernel::HLERequestContext& ctx);
 
         /**
-         * APT::CheckNew3DSThingy service function
+         * APT::Unknown0x0103 service function. Determines whether Smash 4 allows C-Stick
          *  Outputs:
          *      1: Result code, 0 on success otherwise error code
-         *      2: u8 output: 2 = New3DS+valid/initialized (in Smash4), 1 = Old3DS or you did
-         * something wrong with NS???
+         *      2: u8 output: 2 = New3DS+valid/initialized (in Smash 4), 1 = Old3DS or invalid
          */
-        void CheckNew3DSThingy(Kernel::HLERequestContext& ctx);
+        void Unknown0x0103(Kernel::HLERequestContext& ctx);
 
         /**
          * APT::IsTitleAllowed service function

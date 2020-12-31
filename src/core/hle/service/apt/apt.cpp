@@ -1008,7 +1008,7 @@ void Module::APTInterface::CheckNew3DS(Kernel::HLERequestContext& ctx) {
     LOG_WARNING(Service_APT, "(STUBBED) called");
 }
 
-void Module::APTInterface::CheckNew3DSThingy(Kernel::HLERequestContext& ctx) {
+void Module::APTInterface::Unknown0x0103(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x103, 0, 0); // 0x01030000
     IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
 
