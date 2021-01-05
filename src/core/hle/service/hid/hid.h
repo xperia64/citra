@@ -112,7 +112,7 @@ struct SharedMem {
 
         INSERT_PADDING_WORDS(0x1);
 
-        float sliderstate_3d;
+        f32 sliderstate_3d;
 
         PadState current_state; ///< Current state of the pad buttons
 
