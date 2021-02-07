@@ -1108,7 +1108,7 @@ void RendererOpenGL::TryPresent(int timeout_ms) {
                       GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
     // Delete the fence if we're re-presenting to avoid leaking fences
-    if(frame->present_fence) {
+    if (frame->present_fence) {
         glDeleteSync(frame->present_fence);
     }
 
